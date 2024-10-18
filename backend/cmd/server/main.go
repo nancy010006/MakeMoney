@@ -23,7 +23,7 @@ func main() {
 
 	// 啟動服務器
 	log.Println("服務器正在啟動，監聽端口 8080...")
-	if err := r.Run(":8088"); err != nil {
+	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("啟動服務器失敗: %v", err)
 	}
 }

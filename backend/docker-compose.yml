@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    ports:
+      - "8088:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=makemoney
+      - DB_PASSWORD=makemoney_password
+      - DB_NAME=makemoney
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=makemoney
+      - MYSQL_USER=makemoney
+      - MYSQL_PASSWORD=makemoney_password
+    volumes:
+      - ./deploy/scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - db_data:/var/lib/mysql
+
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - "6380:6379"
+
+volumes:
+  db_data:
