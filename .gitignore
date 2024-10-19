@@ -3,6 +3,7 @@
 backend/.env
 
 # Go 相關
+backend/gin-bin
 *.exe
 *.exe~
 *.dll
