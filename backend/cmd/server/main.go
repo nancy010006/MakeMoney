@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nancy010006/MakeMoney/internal/database"
 )
 
 func main() {
+
 	// 創建一個默認的 Gin 路由器
 	r := gin.Default()
 
@@ -52,6 +54,13 @@ func loginHandler(c *gin.Context) {
 }
 
 func getStocksHandler(c *gin.Context) {
+	// 測試數據庫連接
+	err := database.TestDatabaseConnection()
+	if err != nil {
+		log.Fatalf("數據庫連接測試失敗: %v", err)
+	} else {
+		log.Println("數據庫連接測試成功")
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "獲取股票信息功能待實現"})
 }
 
