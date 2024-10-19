@@ -10,23 +10,23 @@ services:
     volumes:
       - .:/app:rw
     environment:
-      - DB_HOST=db
+      - DB_HOST=${DB_HOST}
       - DB_PORT=3306
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_PORT=${REDIS_PORT}
       - GO_ENV=development
-    command: gin --appPort 8080 --port 3000 --immediate --path . --build ./cmd/server run main.go
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: gin --appPort 8080 --port 3000 --immediate --path . --build ./cmd/server run main.go
 
   db:
     image: mysql:8.0
-    ports:
-      - "${DB_PORT:-3308}:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME}
@@ -39,11 +39,20 @@ services:
       - ./mysql-config:/etc/mysql/conf.d
       - db_data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   redis:
     image: redis:6.2-alpine
     ports:
-      - "${REDIS_PORT:-6380}:6379"
+      - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   adminer:
     image: adminer
