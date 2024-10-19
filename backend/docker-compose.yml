@@ -19,6 +19,9 @@ services:
       - REDIS_PORT=6379
       - GO_ENV=development
     command: gin --appPort 8080 --port 3000 --immediate --path . --build ./cmd/server run main.go
+    depends_on:
+      - db
+      - redis
 
   db:
     image: mysql:8.0
@@ -29,14 +32,26 @@ services:
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
     volumes:
       - ./deploy/scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - ./mysql-config:/etc/mysql/conf.d
       - db_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
   redis:
     image: redis:6.2-alpine
     ports:
       - "${REDIS_PORT:-6380}:6379"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8089:8080"
+    depends_on:
+      - db
 
 volumes:
   db_data:
